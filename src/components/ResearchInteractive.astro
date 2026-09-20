@@ -1,0 +1,39 @@
+---
+import Diagram from './Diagram.astro';
+const { kind }=Astro.props;
+---
+<div class="diagram-panel" data-interactive={kind}>
+{kind==='network' ? <>
+  <p class="art-index">FIG. 03 / A NETWORK, TWO PERSPECTIVES</p>
+  <svg viewBox="0 0 320 190" class="science-diagram network-interactive" aria-label="Illustrative network with eight vertices and twelve edges" role="img"><g fill="none" stroke="currentColor" stroke-width="1.5" data-edges><path d="M70 45H220V145H70ZM105 20H255V120H105ZM70 45L105 20M220 45L255 20M220 145L255 120M70 145L105 120"/></g><g fill="currentColor" data-vertices>{[[70,45],[220,45],[220,145],[70,145],[105,20],[255,20],[255,120],[105,120]].map(([cx,cy])=><circle cx={cx} cy={cy} r="4"/>)}</g></svg>
+  <div class="diagram-controls"><button data-view="edges" aria-pressed="true">Edges</button><button data-view="vertices" aria-pressed="false">Vertices</button></div>
+  <p class="diagram-explanation" aria-live="polite">Edges carry irreducible representation labels.</p>
+</> : <>
+  <p class="art-index">FIG. 02 / A TWO-DIMENSIONAL COBORDISM</p>
+  <div data-cobordism><Diagram kind="cobordism" large/></div>
+  <div class="diagram-controls"><button data-step="0" aria-pressed="true">1 · Input</button><button data-step="1" aria-pressed="false">2 · Surface</button><button data-step="2" aria-pressed="false">3 · Output</button></div>
+  <p class="diagram-explanation" aria-live="polite">Incoming boundary: S¹, assigned the state space V = Z(S¹).</p>
+</>}
+
+</div>
+<script>
+ document.querySelectorAll<HTMLElement>('[data-interactive]').forEach(panel=>{
+   const description=panel.querySelector('.diagram-explanation')!;
+   panel.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.addEventListener('click',()=>{
+     panel.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+     if(panel.dataset.interactive==='network'){
+       const vertices=button.dataset.view==='vertices';
+       panel.querySelectorAll('[data-vertices] circle').forEach(c=>c.setAttribute('r',vertices?'7':'4'));
+       panel.querySelector('[data-edges]')?.setAttribute('opacity',vertices?'.25':'1');
+       description.textContent=vertices?'Vertices carry intertwiners between incident representations.':'Edges carry irreducible representation labels.';
+     }else{
+       const step=Number(button.dataset.step);
+       const texts=['Incoming boundary: S¹, assigned the state space V = Z(S¹).','Pair-of-pants cobordism Σ, assigned the map Z(Σ): V → V ⊗ V.','Outgoing boundary: S¹ ⊔ S¹, assigned V ⊗ V.'];
+       description.textContent=texts[step];
+       const diagram=panel.querySelector('[data-cobordism] svg')!;
+       diagram.querySelectorAll('ellipse').forEach((e,i)=>{e.setAttribute('stroke-width',(step===0&&i===0)||(step===2&&i>0)?'3':'1.3');e.setAttribute('opacity',step===1?'.4':'1');});
+       diagram.querySelectorAll('path').forEach(p=>p.setAttribute('stroke-width',step===1?'2':'1.3'));
+     }
+   }));
+ });
+</script>

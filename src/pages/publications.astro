@@ -1,0 +1,22 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Paper from '../components/Paper.astro';
+import publications from '../data/publications.json';
+import {site} from '../data/site';
+import {url} from '../lib/paths';
+const papers=[...publications].sort((a,b)=>b.year-a.year);
+const topics=[...new Set(papers.flatMap(p=>p.topics))].sort();
+const years=[...new Set(papers.map(p=>p.year))];
+---
+<Layout title="Publications" active="Publications"><div class="page-heading"><div class="container"><p class="eyebrow">PAPERS & PREPRINTS</p><h1>Publications</h1><p>Papers and preprints on quantum geometry, topological field theory, and quantum learning.</p><a class="text-link" style="margin-top:20px" href={site.scholar}>Professor Marcianò's full Scholar record <span aria-hidden="true">↗</span></a></div></div><section class="section container"><div class="filter-bar" id="publication-filters" hidden><label>Search title or author<input type="search" id="paper-search" placeholder="e.g. spin networks" autocomplete="off"/></label><label>Research topic<select id="paper-topic"><option value="">All topics</option>{topics.map(t=><option>{t}</option>)}</select></label><label>Year<select id="paper-year"><option value="">All years</option>{years.map(y=><option>{y}</option>)}</select></label><button class="button" id="reset-filters">Reset filters</button></div><div style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px"><p class="filter-count" role="status" id="paper-count">{papers.length} publications</p><a class="text-link" href={url('publications.bib')} download>Download BibTeX ↓</a></div><noscript><p class="note">All papers are listed below. Enable JavaScript to search or filter the bibliography.</p></noscript><div>{papers.map(paper=><Paper paper={paper} filterable/>)}</div><p class="empty-state" id="empty-papers" hidden>No matching papers. Try another topic or clear your search.</p></section></Layout>
+<script>
+ const search=document.querySelector<HTMLInputElement>('#paper-search')!;
+ const topic=document.querySelector<HTMLSelectElement>('#paper-topic')!;
+ const year=document.querySelector<HTMLSelectElement>('#paper-year')!;
+ const rows=[...document.querySelectorAll<HTMLElement>('[data-paper]')];
+ const count=document.querySelector('#paper-count')!;
+ document.querySelector<HTMLElement>('#publication-filters')!.hidden=false;
+ function filter(){const query=search.value.trim().normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase();let n=0;rows.forEach(row=>{const matches=(!query||row.dataset.search!.includes(query))&&(!year.value||row.dataset.year===year.value)&&(!topic.value||JSON.parse(row.dataset.topics!).includes(topic.value));row.hidden=!matches;if(matches)n++;});count.textContent=`${n} of ${rows.length} publications shown`;document.querySelector<HTMLElement>('#empty-papers')!.hidden=n!==0;}
+ search.addEventListener('input',filter);topic.addEventListener('change',filter);year.addEventListener('change',filter);
+ document.querySelector('#reset-filters')?.addEventListener('click',()=>{search.value='';topic.value='';year.value='';filter();search.focus();});
+</script>

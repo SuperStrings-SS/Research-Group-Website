@@ -1,0 +1,80 @@
+---
+const pts = Array.from({length:240},(_,i)=>{const t=i/239*Math.PI*2;return {x:(2+Math.cos(3*t))*Math.cos(2*t),y:(2+Math.cos(3*t))*Math.sin(2*t),z:Math.sin(3*t)};});
+const segments=pts.slice(0,-1).map((p,i)=>({a:p,b:pts[i+1],z:(p.z+pts[i+1].z)/2})).sort((a,b)=>a.z-b.z);
+---
+<div class="hero-knot" id="knot-viewer">
+  <div class="knot-meta"><span>FIG. 01</span><span>THE TREFOIL · T(2,3)</span></div>
+  <div class="knot-stage">
+    <svg class="knot-fallback" viewBox="0 0 420 420" aria-hidden="true"><g transform="translate(210 210) rotate(-20)">{segments.map(({a,b,z})=><line x1={a.x*54} y1={a.y*54} x2={b.x*54} y2={b.y*54} stroke={`hsl(155 12% ${58+z*17}%)`} stroke-width="15" stroke-linecap="round"/>)}</g></svg>
+  </div>
+  <details class="knot-info"><summary>About this shape</summary><p>Trefoil torus knot T(2,3), with crossing number 3. Drag to change the viewing angle.</p></details>
+  <div class="knot-controls" hidden><span class="knot-hint">DRAG TO ROTATE</span><button type="button" id="knot-wire" aria-pressed="false">Wireframe</button></div>
+  <span class="knot-status" aria-live="polite"></span>
+</div>
+<script>
+  import * as THREE from 'three';
+  const viewer = document.querySelector<HTMLElement>('#knot-viewer');
+  async function initKnot(){
+    if(!viewer)return;
+    const stage=viewer.querySelector<HTMLElement>('.knot-stage')!;
+    const controls=viewer.querySelector<HTMLElement>('.knot-controls')!;
+    const wire=viewer.querySelector<HTMLButtonElement>('#knot-wire')!;
+    const status=viewer.querySelector<HTMLElement>('.knot-status')!;
+    let renderer: THREE.WebGLRenderer;
+    try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});}catch{status.textContent='Static trefoil illustration';return;}
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.75));
+    renderer.setClearColor(0x000000,0);
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.25;
+    stage.appendChild(renderer.domElement);
+    renderer.domElement.setAttribute('tabindex','0');
+    renderer.domElement.setAttribute('role','img');
+    renderer.domElement.setAttribute('aria-label','Rotating trefoil knot. Drag or use arrow keys to change the view.');
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(35,1,.1,100);
+    camera.position.set(0,0,12.3);
+    const sculpture=new THREE.Group();scene.add(sculpture);
+    const geometry=new THREE.TorusKnotGeometry(2.08,.255,240,24,2,3);
+    const material=new THREE.MeshPhysicalMaterial({color:0x9fb8b0,metalness:.28,roughness:.38,clearcoat:.35,clearcoatRoughness:.2});
+    const mesh=new THREE.Mesh(geometry,material);sculpture.add(mesh);
+    // Fine parallel strands follow the same trefoil centreline, providing a readable wire view.
+    const wireMaterial=new THREE.MeshBasicMaterial({color:0xc5ded3,wireframe:true,transparent:true,opacity:.56});
+    const wireMesh=new THREE.Mesh(new THREE.TorusKnotGeometry(2.08,.255,128,12,2,3),wireMaterial);wireMesh.visible=false;sculpture.add(wireMesh);
+    const halo=new THREE.Mesh(new THREE.TorusGeometry(3.2,.006,5,180),new THREE.MeshBasicMaterial({color:0x8f9a82,transparent:true,opacity:.35}));halo.rotation.x=1.1;halo.rotation.y=.25;scene.add(halo);
+    scene.add(new THREE.HemisphereLight(0xe0ece7,0x242c28,2.1));
+    const key=new THREE.DirectionalLight(0xf0f5f3,5);key.position.set(-3,5,5);scene.add(key);
+    const fill=new THREE.DirectionalLight(0xb2c4af,3);fill.position.set(4,-2,2);scene.add(fill);
+    const rim=new THREE.DirectionalLight(0xb8d4cc,5);rim.position.set(2,4,-4);scene.add(rim);
+    const initial={x:.25,y:.15,z:-.38};sculpture.rotation.set(initial.x,initial.y,initial.z);
+    const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+    let paused=motion.matches,visible=true,dragging=false,lastX=0,lastY=0,last=0,frame=0,destroyed=false;
+    const render=()=>renderer.render(scene,camera);
+    const animate=(time:number)=>{frame=0;if(destroyed||!visible||document.hidden||paused||dragging)return;const delta=Math.min((time-last)/1000,.04);last=time;sculpture.rotation.y+=delta*.13;sculpture.rotation.x+=delta*.024;render();frame=requestAnimationFrame(animate);};
+    const schedule=()=>{if(!frame&&!paused&&visible&&!document.hidden&&!dragging&&!destroyed){last=performance.now();frame=requestAnimationFrame(animate);}};
+    const syncPause=()=>{if(paused){cancelAnimationFrame(frame);frame=0;}else schedule();};
+    const resize=()=>{const box=stage.getBoundingClientRect();if(!box.width||!box.height)return;renderer.setSize(box.width,box.height);camera.aspect=box.width/box.height;camera.position.z=camera.aspect<.85?14.4:12.3;camera.updateProjectionMatrix();render();};
+    const observer=new ResizeObserver(resize);observer.observe(stage);
+    const intersection=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(!visible){cancelAnimationFrame(frame);frame=0;}else schedule();});intersection.observe(stage);
+    wire.addEventListener('click',()=>{const on=wire.getAttribute('aria-pressed')!=='true';wire.setAttribute('aria-pressed',String(on));wire.textContent=on?'Solid surface':'Wireframe';mesh.visible=!on;wireMesh.visible=on;render();});
+    renderer.domElement.addEventListener('pointerdown',event=>{dragging=true;lastX=event.clientX;lastY=event.clientY;renderer.domElement.setPointerCapture(event.pointerId);});
+    renderer.domElement.addEventListener('pointermove',event=>{if(!dragging)return;sculpture.rotation.y+=(event.clientX-lastX)*.009;if(event.pointerType==='mouse')sculpture.rotation.x+=(event.clientY-lastY)*.009;lastX=event.clientX;lastY=event.clientY;render();});
+    renderer.domElement.addEventListener('keydown',event=>{
+      if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;
+      event.preventDefault();
+      if(event.key==='ArrowLeft')sculpture.rotation.y-=.15;
+      if(event.key==='ArrowRight')sculpture.rotation.y+=.15;
+      if(event.key==='ArrowUp')sculpture.rotation.x-=.15;
+      if(event.key==='ArrowDown')sculpture.rotation.x+=.15;
+      render();
+    });
+    const endDrag=()=>{dragging=false;schedule();};renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
+    const onVisibility=()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else schedule();};document.addEventListener('visibilitychange',onVisibility);
+    const onMotion=()=>{paused=motion.matches;syncPause();};motion.addEventListener('change',onMotion);
+    renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();paused=true;syncPause();stage.classList.remove('ready');controls.hidden=true;status.textContent='Static illustration · 3D rendering unavailable';});
+    const dispose=()=>{destroyed=true;cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();document.removeEventListener('visibilitychange',onVisibility);motion.removeEventListener('change',onMotion);geometry.dispose();material.dispose();wireMesh.geometry.dispose();wireMaterial.dispose();halo.geometry.dispose();(halo.material as THREE.Material).dispose();renderer.dispose();};
+    window.addEventListener('pagehide',event=>{if(!event.persisted)dispose();});
+    resize();stage.classList.add('ready');controls.hidden=false;syncPause();schedule();
+  }
+  initKnot();
+</script>

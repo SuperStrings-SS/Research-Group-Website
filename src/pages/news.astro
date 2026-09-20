@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {getCollection,render} from 'astro:content';
+const items=(await getCollection('news')).sort((a,b)=>a.data.date.localeCompare(b.data.date));
+const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const events=items.filter(i=>i.data.kind!=='Group news');
+const groups=[{label:'Upcoming events',items:events.filter(i=>i.data.date>=today)},{label:'Past events',items:events.filter(i=>i.data.date<today).reverse()},{label:'Group news',items:items.filter(i=>i.data.kind==='Group news').reverse()}];
+---
+<Layout title="News & Events" active="News & Events"><div class="page-heading"><div class="container"><p class="eyebrow">NEWS & EVENTS</p><h1>News & events</h1><p>Seminars, reading groups, and group announcements. Times are in Shanghai time (UTC+8).</p></div></div><section class="section container">{groups.map(async group=><section style="margin-bottom:40px"><div class="section-heading"><h2 style="font-size:2.5rem">{group.label}</h2></div>{group.items.length?<div class="event-list">{await Promise.all(group.items.map(async item=>{const {Content}=await render(item);const date=new Date(`${item.data.date}T12:00:00Z`);return <article class="event-row" id={item.id}><time class="event-date" datetime={item.data.date}><strong>{date.getUTCDate()}</strong>{date.toLocaleDateString('en-GB',{month:'short',year:'numeric',timeZone:'UTC'})}</time><div><span class="eyebrow">{item.data.kind}</span><h3>{item.data.title}</h3><p>{item.data.summary}</p><details><summary>Details</summary><div class="prose"><Content/></div></details></div><div class="event-place">{item.data.time&&<p>{item.data.time} · UTC+8</p>}{item.data.location&&<p>{item.data.location}</p>}</div></article>;}))}</div>:<p class="muted">No entries in this section.</p>}</section>)}</section></Layout>

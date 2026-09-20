@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Diagram from '../components/Diagram.astro';
+import ResearchInteractive from '../components/ResearchInteractive.astro';
+import {getCollection,render} from 'astro:content';
+import {url} from '../lib/paths';
+const research=(await getCollection('research')).sort((a,b)=>a.data.number.localeCompare(b.data.number));
+---
+<Layout title="Research" active="Research"><div class="page-heading"><div class="container"><p class="eyebrow">OUR RESEARCH</p><h1>Research</h1><p>Quantum geometry, quantum information, quantum gravity, and quantum machine learning—connected through topology and mathematical structure.</p><div class="anchor-list">{research.map(item=><a href={`#${item.id}`}>{item.data.short}</a>)}</div></div></div><div class="container">{await Promise.all(research.map(async item=>{const {Content}=await render(item);return <section class="research-detail" id={item.id}><div><p class="eyebrow">RESEARCH DIRECTION {item.data.number}</p><h2>{item.data.title}</h2><div class="prose"><Content/></div><a class="text-link" style="margin-top:22px" href={url('publications/')}>Related publications <span aria-hidden="true">↗</span></a></div>{['network','cobordism'].includes(item.data.diagram)?<ResearchInteractive kind={item.data.diagram}/>:<div class="diagram-panel"><p class="art-index">A MATHEMATICAL PERSPECTIVE</p><Diagram kind={item.data.diagram} large/><p class="diagram-caption">{item.data.diagram==='circuit'?'Quantum circuit.':item.data.diagram==='surface'?'Geometric discretisation.':'Network representation.'}</p></div>}</section>;}))}</div></Layout>

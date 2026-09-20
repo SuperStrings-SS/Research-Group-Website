@@ -1,0 +1,7 @@
+---
+const { paper, summary = false, filterable = false }=Astro.props;
+---
+<article class="paper-row" data-paper={filterable?paper.id:undefined} data-search={filterable?`${paper.title} ${paper.authors.join(' ')} ${paper.venue}`.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase():undefined} data-year={paper.year} data-topics={JSON.stringify(paper.topics)}>
+  <div class="paper-year">{paper.year}</div><div><h3 class="paper-title">{paper.doi||paper.arxiv ? <a href={paper.doi?`https://doi.org/${paper.doi}`:`https://arxiv.org/abs/${paper.arxiv}`}>{paper.title}</a> : paper.title}</h3><p class="paper-authors">{paper.authors.join(', ')}</p><p class="paper-venue">{paper.venue}</p>{summary&&<p class="paper-summary">{paper.summary}</p>}<div class="tags">{paper.topics.map((topic:string)=><span class="tag">{topic}</span>)}</div></div>
+  <div class="paper-links">{paper.arxiv&&<a href={`https://arxiv.org/abs/${paper.arxiv}`}>arXiv ↗</a>}{paper.doi&&<a href={`https://doi.org/${paper.doi}`}>DOI ↗</a>}</div>
+</article>

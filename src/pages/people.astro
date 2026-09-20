@@ -1,0 +1,6 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {getCollection,render} from 'astro:content';
+const people=(await getCollection('people')).sort((a,b)=>a.data.order-b.data.order);
+---
+<Layout title="People" active="People"><div class="page-heading"><div class="container"><p class="eyebrow">THE GROUP</p><h1>People</h1><p>Members of the Antonino Marcianò Research Group.</p></div></div><section class="section container"><div class="people-grid">{await Promise.all(people.filter(p=>!p.data.alumni).map(async person=>{const {Content}=await render(person);return <article class="person-card"><div class="person-portrait" aria-label={`Initials for ${person.data.name}`}><span>{person.data.initials}</span></div><div class="person-content"><h2>{person.data.name}</h2><p class="person-role">{person.data.role}</p>{person.data.interests&&<p>{person.data.interests}</p>}<details><summary>{person.data.office ? 'Biography & office' : 'Biography'}</summary><Content/>{person.data.office&&<p>{person.data.office}</p>}</details>{person.data.link&&<a class="text-link" href={person.data.link}>University profile ↗</a>}</div></article>;}))}</div><div class="alumni-list"><h2>Alumni & past visitors</h2>{people.filter(p=>p.data.alumni).map(person=><p>{person.data.name} <span class="muted">· {person.data.role}</span></p>)}</div></section></Layout>

@@ -1,0 +1,35 @@
+---
+import '@fontsource/dm-sans/400.css';
+import '@fontsource/dm-sans/500.css';
+import '@fontsource/dm-sans/600.css';
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+import '../styles/global.css';
+import { site } from '../data/site';
+import { url } from '../lib/paths';
+const { title = 'Quantum geometry, information & gravity', description = 'The Antonino Marcianò Research Group at Fudan University. Exploring quantum geometry, quantum information, quantum gravity, and quantum machine learning.', active = 'Home' } = Astro.props;
+const navigation = [['Research','research/'],['Publications','publications/'],['People','people/'],['News & Events','news/']];
+---
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content={description}/>{site.preview && <meta name="robots" content="noindex, nofollow"/>}<meta name="theme-color" content="#171918"/><title>{title} — Marcianò Research Group</title><link rel="icon" href={url('favicon.svg')} type="image/svg+xml"/></head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="container header-inner">
+    <a class="brand" href={url()} aria-label="Antonino Marcianò Research Group home"><svg width="39" height="39" viewBox="0 0 44 44" fill="none" aria-hidden="true"><path d="M22 6C39 6 41 28 22 35C3 42 3 20 22 6ZM22 6C5 6 3 28 22 35C41 42 41 20 22 6Z" stroke="currentColor" stroke-width="1.5"/><circle cx="22" cy="22" r="5" stroke="currentColor" stroke-width="1.5"/></svg><span>Antonino Marcianò<small>RESEARCH GROUP</small></span></a>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu <span aria-hidden="true">☰</span></button>
+    <nav id="navigation" aria-label="Main navigation">{navigation.map(([label,path])=><a href={url(path)} aria-current={active===label?'page':undefined}>{label}</a>)}<a class="nav-contact" href={url('contact/')} aria-current={active==='Contact'?'page':undefined}>Contact <span aria-hidden="true">↗</span></a></nav>
+  </div></header>
+  <main id="main"><slot/></main>
+  <footer class="site-footer"><div class="container footer-top"><div><a class="footer-name" href={url()}>Antonino Marcianò<br/>Research Group<span class="footer-star" aria-hidden="true">✳</span></a><p class="muted">Fudan University · Shanghai, China</p></div><div class="footer-links"><div><span class="eyebrow">EXPLORE</span><a href={url('research/')}>Research</a><a href={url('publications/')}>Publications</a><a href={url('people/')}>People</a></div><div><span class="eyebrow">CONNECT</span><a href={url('join/')}>Join the group</a><a href={url('contact/')}>Contact & visit</a><a href={site.scholar}>Google Scholar ↗</a></div></div></div><div class="container footer-bottom"><span>© {new Date().getFullYear()} Marcianò Research Group</span><span>Department of Physics · Fudan University</span><a href="#main">Back to top ↑</a></div></footer>
+  <script>
+    const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
+    const nav = document.querySelector('#navigation');
+    const close = () => { toggle?.setAttribute('aria-expanded','false'); nav?.classList.remove('open'); };
+    toggle?.addEventListener('click',()=>{const expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));nav?.classList.toggle('open',!expanded);});
+    document.addEventListener('keydown',(event)=>{if(event.key==='Escape'&&toggle?.getAttribute('aria-expanded')==='true'){close();toggle.focus();}});
+    document.addEventListener('click',event=>{if(toggle?.getAttribute('aria-expanded')==='true' && !nav?.contains(event.target as Node) && !toggle.contains(event.target as Node))close();});
+    window.matchMedia('(min-width:851px)').addEventListener('change',()=>close());
+    nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
+  </script>
+</body></html>

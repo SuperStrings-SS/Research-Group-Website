@@ -1,0 +1,104 @@
+[
+  {
+    "id": "sample-geometry-learning",
+    "title": "Learning with quantum geometry: a research perspective",
+    "authors": [
+      "Lin Wei",
+      "Chen Yu"
+    ],
+    "year": 2026,
+    "venue": "",
+    "topics": [
+      "Quantum Machine Learning",
+      "Quantum Geometry"
+    ],
+    "sample": true,
+    "featured": false,
+    "summary": ""
+  },
+  {
+    "id": "sample-topological-information",
+    "title": "Topological structures for quantum information processing",
+    "authors": [
+      "Elena Rossi",
+      "Lucía Morales"
+    ],
+    "year": 2025,
+    "venue": "",
+    "topics": [
+      "TQFT",
+      "Quantum Computing"
+    ],
+    "sample": true,
+    "featured": false,
+    "summary": ""
+  },
+  {
+    "id": "lulli2023hexagonal",
+    "title": "The exact evaluation of hexagonal spin-networks and topological quantum neural networks",
+    "authors": [
+      "Matteo Lulli",
+      "Antonino Marcianò",
+      "Emanuele Zappala"
+    ],
+    "year": 2023,
+    "venue": "arXiv preprint · 2310.03632",
+    "topics": [
+      "TQNN",
+      "Quantum Geometry"
+    ],
+    "arxiv": "2310.03632",
+    "sample": false,
+    "featured": true,
+    "summary": "Evaluating hexagonal spin networks provides a concrete computational tool for studying topological quantum neural networks."
+  },
+  {
+    "id": "marciano2022quantum",
+    "title": "Quantum Neural Networks and Topological Quantum Field Theories",
+    "authors": [
+      "Antonino Marcianò",
+      "Deen Chen",
+      "Filippo Fabrocini",
+      "Chris Fields",
+      "Enrico Greco",
+      "Niels Gresnigt",
+      "Krid Jinklub",
+      "Matteo Lulli",
+      "Kostas Terzidis",
+      "Emanuele Zappala"
+    ],
+    "year": 2022,
+    "venue": "Neural Networks 153, 164–178",
+    "topics": [
+      "TQFT",
+      "TQNN",
+      "Quantum Machine Learning"
+    ],
+    "arxiv": "2007.00142",
+    "doi": "10.1016/j.neunet.2022.05.028",
+    "sample": false,
+    "featured": true,
+    "summary": "An approach connecting quantum neural networks with spin networks and the language of topological quantum field theory."
+  },
+  {
+    "id": "fields2022sequential",
+    "title": "Sequential measurements, TQFTs, and TQNNs",
+    "authors": [
+      "Chris Fields",
+      "James F. Glazebrook",
+      "Antonino Marcianò"
+    ],
+    "year": 2022,
+    "venue": "Fortschritte der Physik · 2200104",
+    "topics": [
+      "TQFT",
+      "TQNN",
+      "Quantum Information"
+    ],
+    "arxiv": "2205.13184",
+    "doi": "10.1002/prop.202200104",
+    "sample": false,
+    "featured": true,
+    "summary": "A framework relating sequential measurements, quantum reference frames, and topological quantum neural networks."
+  }
+]
